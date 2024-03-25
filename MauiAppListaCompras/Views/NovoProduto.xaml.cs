@@ -13,18 +13,16 @@ public partial class NovoProduto : ContentPage
     {
         try
         {
-            Produto produto_anexado = BindingContext as Produto;
-
             Produto p = new Produto
             {
-                Id = produto_anexado.Id,
                 Descricao = txt_descricao.Text,
                 Quantidade = Convert.ToDouble(txt_quantidade.Text),
                 Preco = Convert.ToDouble(txt_preco.Text),
             };
 
-            await App.db.Update(p);
+            await App.db.Insert(p);
             await DisplayAlert("Sucesso!", "Produto Editado!", "OK");
+            await Navigation.PushAsync(new MainPage());
 
         }
         catch (Exception ex)

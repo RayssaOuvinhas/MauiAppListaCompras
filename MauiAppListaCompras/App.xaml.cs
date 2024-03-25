@@ -1,4 +1,5 @@
 ﻿using MauiAppListaCompras.Helpers;
+
 namespace MauiAppListaCompras
 {
     public partial class App : Application
@@ -9,7 +10,7 @@ namespace MauiAppListaCompras
         {
             get
             {
-                if(db == null)
+                if(_db == null)
                 {
                     string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "banco_sqlite_compras.db3");
 

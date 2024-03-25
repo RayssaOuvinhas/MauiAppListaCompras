@@ -16,42 +16,38 @@ namespace MauiAppListaCompras
         private void ToolbarItem_Clicked_Somar(object sender, EventArgs e)
         {
             double soma = lista_produtos.Sum(i => (i.Preco * i.Quantidade));
-            string msg = $"O total é {soma:(}";
+            string msg = $"O total é {soma:C}";
             DisplayAlert("Somatória", msg, "Fechar");
         }
 
-        protected override void OnAppearing()
+        protected async override void OnAppearing()
         {
           if(lista_produtos.Count == 0)
-            {
-                Task.Run(async () =>
-                {
-                    List<Produto> tmp = await App.db.GetAll();
-                    foreach (Produto p in tmp)
-                    {
-                        lista_produtos.Add(p);
-                    }
-                });
-            }
+          {
+               List<Produto> tmp = await App.db.GetAll();
+               foreach (Produto p in tmp)
+               {
+                  lista_produtos.Add(p);
+               }
+           }
         }
 
         private async void ToolbarItem_Clicked_Add(object sender, EventArgs e)
         {
-            await Shell.Current.GoToAsync("//NovoProduto");
+            await Navigation.PushAsync(new Views.NovoProduto());
         }
 
-        private void txt_search_TextChanged(object sender, TextChangedEventArgs e)
+        private async void txt_search_TextChanged(object sender, TextChangedEventArgs e)
         {
             string q = e.NewTextValue;
             lista_produtos.Clear();
-            Task.Run(async () =>
+
+            List<Produto> tmp = await App.db.Search(q);
+            foreach (Produto p in tmp)
             {
-                List<Produto> tmp = await App.db.Search(q);
-                foreach (Produto p in tmp)
-                {
-                    lista_produtos.Add(p);
-                }
-            });
+               lista_produtos.Add(p);
+            }
+            
         }
 
         private void ref_carregando_Refreshing(object sender, EventArgs e)
@@ -70,7 +66,12 @@ namespace MauiAppListaCompras
 
         private void lst_produtos_ItemSelected(object sender, SelectedItemChangedEventArgs e)
         {
-            
+            Produto? p = e.SelectedItem as Produto;
+
+            Navigation.PushAsync(new Views.EditarProduto
+            {
+                BindingContext = p
+            });
 
         }
 
@@ -87,6 +88,7 @@ namespace MauiAppListaCompras
                 {
                     await App.db.Delete(p.Id);
                     await DisplayAlert("Sucesso", "Produto Removido", "Ok");
+                    lista_produtos.Remove(p);
                 }
             }
             catch (Exception ex)
